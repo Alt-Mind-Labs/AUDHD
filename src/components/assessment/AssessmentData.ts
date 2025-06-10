@@ -76,13 +76,23 @@ export const sampleQuestions = [
   },
 ];
 
-// Function to fetch random questions from the database
+/**
+ * Function to fetch random questions from the database for daily assessment.
+ * 
+ * This function randomly selects questions from the ADHD screening questions database
+ * to ensure that users get a varied set of questions each day. The randomization 
+ * is achieved using SQL's RANDOM() function, which provides truly random selection
+ * from the full pool of available questions.
+ * 
+ * @param count - Number of questions to fetch (default: 5)
+ * @returns Promise<Question[]> - Array of randomly selected questions
+ */
 export const fetchRandomQuestions = async (count = 5): Promise<Question[]> => {
   try {
     const { data, error } = await supabase
-      .from('screening_questions')
+      .from('adhd_screening_questions')
       .select('id, question_text, category, score_type, source')
-      .order('id')
+      .order('random()')
       .limit(count);
     
     if (error) {
