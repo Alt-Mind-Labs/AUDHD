@@ -21,6 +21,7 @@ jobs:
     env:
       IMAGE_NAME: aijourney-webapp
       GITHUB_REPO_OWNER: ${{ github.repository_owner }}
+      GITHUB_REPO_OWNER=$(echo "$GITHUB_REPO_OWNER" | tr '[:upper:]' '[:lower:]')
 
     steps:
       - name: Checkout full history & tags
