@@ -178,7 +178,15 @@ export const getStrengthsAndWeaknesses = async (userId: string): Promise<UserIns
     
     // Analyze patterns across all assessments
     const historicalPatterns = analyzeHistoricalPatterns(allAssessments);
-    const techniquePatterns = analyzeTechniquePatterns(techniqueInteractions || []);
+    const techniquePatterns = analyzeTechniquePatterns(
+      (techniqueInteractions || []).filter((interaction): interaction is TechniqueInteraction => 
+        interaction && 
+        typeof interaction.technique_id === 'string' &&
+        typeof interaction.technique_title === 'string' &&
+        (interaction.feedback === 'helpful' || interaction.feedback === 'not-helpful' || interaction.feedback === null) &&
+        typeof interaction.created_at === 'string'
+      )
+    );
     
     // Map each attribute to a cognitive area with enhanced descriptions
     const cognitiveAreas = [
@@ -401,8 +409,12 @@ export const getInsightHistory = async (userId: string): Promise<UserInsights[]>
     return history.map(item => ({
       id: item.id,
       generalInsight: item.general_insight,
-      strengths: item.strengths || [],
-      weaknesses: item.weaknesses || [],
+      strengths: Array.isArray(item.strengths) 
+        ? (item.strengths as unknown as Insight[]).filter(s => s && typeof s === 'object' && 'area' in s && 'description' in s)
+        : [],
+      weaknesses: Array.isArray(item.weaknesses) 
+        ? (item.weaknesses as unknown as Insight[]).filter(w => w && typeof w === 'object' && 'area' in w && 'description' in w)
+        : [],
       createdAt: item.created_at,
       assessmentId: item.assessment_id
     }));
